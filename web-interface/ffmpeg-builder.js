@@ -8,14 +8,14 @@ const ASSETS_DIR = path.join(__dirname, '..', 'assets');
 class FFmpegBuilder {
     constructor() {
         this.ffmpegPath = process.env.FFMPEG_PATH
-            || path.join(process.env.HOME, 'ffmpeg-4.4.4', 'build', 'bin', 'ffmpeg');
+            || path.join(process.env.HOME, 'ffmpeg-decklink', 'bin', 'ffmpeg');
         this.logoPath = process.env.LOGO_PATH
             || path.join(process.env.HOME, 'Pictures', 'PNG-actua', 'actua.png');
         this.barsPath = path.join(ASSETS_DIR, 'bars.png');
         this.resolutionTestPath = null; // optional asset, not included by default
         this.fontPath = '/System/Library/Fonts/SFNSMono.ttf';
         this.cachedDecklinkSinks = null;
-        this.defaultDecklinkName = 'UltraStudio Mini Monitor';
+        this.defaultDecklinkName = 'UltraStudio Monitor 3G';
         this.clockLatencyMs = 200;
         this.ntpOffsetMs = 0;
         this.ntpDispersionMs = null;
@@ -725,7 +725,7 @@ class FFmpegBuilder {
                 const matches = result.stdout
                     .split('\n')
                     .map(line => {
-                        const match = line.match(/\[(.+?)\]\s*$/);
+                        const match = line.match(/\[(.+?)\]/);
                         return match ? match[1].trim() : null;
                     })
                     .filter(Boolean);
