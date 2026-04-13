@@ -364,7 +364,30 @@ function sanitizeConfig(config = {}) {
 }
 
 // Settings storage
-let savedSettings = sanitizeConfig(DEFAULT_CONFIG);
+const settingsFile = path.join(__dirname, 'settings.json');
+
+function loadSettings() {
+    try {
+        if (fs.existsSync(settingsFile)) {
+            const data = fs.readFileSync(settingsFile, 'utf8');
+            const parsed = JSON.parse(data);
+            return sanitizeConfig(parsed);
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+    return sanitizeConfig(DEFAULT_CONFIG);
+}
+
+function saveSettings() {
+    try {
+        fs.writeFileSync(settingsFile, JSON.stringify(savedSettings, null, 2));
+    } catch (error) {
+        console.error('Error saving settings:', error);
+    }
+}
+
+let savedSettings = loadSettings();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -505,6 +528,7 @@ function startFFmpegProcess(config, socket, options = {}) {
         const targetSocket = resolveSocket(socket);
         const cleanConfig = sanitizeConfig(config);
         savedSettings = cleanConfig;
+        saveSettings();
         ffmpegBuilder.setClockTimingInfo({
             latencyMs: cleanConfig.clockLatencyMs,
             ntpOffsetMs: currentNtpStatus.offsetMs,
@@ -656,6 +680,7 @@ app.get('/api/settings', (req, res) => {
 
 app.post('/api/settings', (req, res) => {
     savedSettings = sanitizeConfig({ ...savedSettings, ...req.body });
+    saveSettings();
     res.json({ success: true, settings: savedSettings });
 });
 
