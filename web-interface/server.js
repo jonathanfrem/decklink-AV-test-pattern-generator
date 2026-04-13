@@ -182,6 +182,12 @@ const DEFAULT_CONFIG = {
     showConfigOverlay: true,
     configOverlayFontSize: 36,
     configOverlayPosition: 'top-left',
+    overlayShowFormat: true,
+    overlayShowTone: true,
+    overlayShow400Hz: true,
+    overlayShowCycleId: true,
+    overlayShowFlash: true,
+    showFlashOverlay: true,
     flashOverlayOffset: 25,
     decklinkDevice: null,
     clockLatencyMs: CLOCK_PIPELINE_LATENCY_MS
@@ -338,6 +344,13 @@ function sanitizeConfig(config = {}) {
     } else {
         merged.logoFile = null;
     }
+
+    merged.showFlashOverlay = merged.showFlashOverlay !== false;
+    merged.overlayShowFormat = merged.overlayShowFormat !== false;
+    merged.overlayShowTone = merged.overlayShowTone !== false;
+    merged.overlayShow400Hz = merged.overlayShow400Hz !== false;
+    merged.overlayShowCycleId = merged.overlayShowCycleId !== false;
+    merged.overlayShowFlash = merged.overlayShowFlash !== false;
 
     if (typeof merged.customBackground === 'string') {
         const base = path.basename(merged.customBackground);

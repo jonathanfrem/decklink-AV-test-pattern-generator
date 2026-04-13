@@ -179,6 +179,13 @@
                     </div>
                 </div>
                 <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showFlashOverlay" checked>
+                        Show 1KHz / 400Hz flash indicator
+                    </label>
+                    <div class="control-hint">Displays on-screen text boxes when a 1-frame flash channel is active.</div>
+                </div>
+                <div class="control-group">
                     <label for="flashOverlayOffset">1-frame flash vertical offset:</label>
                     <div class="range-row">
                         <input type="range" id="flashOverlayOffset" min="-100" max="100" value="0">
@@ -215,6 +222,26 @@
                         Show settings overlay
                     </label>
                     <div class="control-hint">Displays active video/audio parameters on-screen.</div>
+                </div>
+                <div class="control-group">
+                    <label>Overlay lines:</label>
+                    <div class="channel-option-row">
+                        <label class="channel-option">
+                            <input type="checkbox" id="overlayShowFormat"> Format
+                        </label>
+                        <label class="channel-option">
+                            <input type="checkbox" id="overlayShowTone"> Tone / level
+                        </label>
+                        <label class="channel-option">
+                            <input type="checkbox" id="overlayShow400Hz"> 400 Hz
+                        </label>
+                        <label class="channel-option">
+                            <input type="checkbox" id="overlayShowCycleId"> Cycle ID
+                        </label>
+                        <label class="channel-option">
+                            <input type="checkbox" id="overlayShowFlash"> 1-frame flash
+                        </label>
+                    </div>
                 </div>
                 <div class="control-group">
                     <label for="overlayFontSize">Overlay font size:</label>

@@ -21,6 +21,7 @@ class BroadcastController {
         this.checkServerStatus();
         this.updateControls();
         this.updateOverlayControlsState();
+        this.updateFlashOverlayControlsState();
         this.updateClockControlsState();
     }
 
@@ -60,6 +61,7 @@ class BroadcastController {
         this.audioChannelForce400Toggles = [];
         this.audioChannelFlashToggles = [];
         this.pendingAudioChannelOptions = null;
+        this.showFlashOverlayCheckbox = document.getElementById('showFlashOverlay');
         this.flashOverlayOffsetSlider = document.getElementById('flashOverlayOffset');
         this.flashOverlayOffsetValue = document.getElementById('flashOverlayOffsetValue');
 
@@ -86,6 +88,11 @@ class BroadcastController {
         this.clockLatencyInput = document.getElementById('clockLatencyMs');
         this.clockPositionsGrid = document.getElementById('clockPositions');
         this.showConfigOverlayCheckbox = document.getElementById('showConfigOverlay');
+        this.overlayShowFormatCheckbox = document.getElementById('overlayShowFormat');
+        this.overlayShowToneCheckbox = document.getElementById('overlayShowTone');
+        this.overlayShow400HzCheckbox = document.getElementById('overlayShow400Hz');
+        this.overlayShowCycleIdCheckbox = document.getElementById('overlayShowCycleId');
+        this.overlayShowFlashCheckbox = document.getElementById('overlayShowFlash');
         this.overlayFontSizeSlider = document.getElementById('overlayFontSize');
         this.overlayFontSizeValue = document.getElementById('overlayFontSizeValue');
         this.overlayPositionSelect = document.getElementById('overlayPosition');
@@ -164,6 +171,12 @@ class BroadcastController {
             this.updateOverlayControlsState();
         });
 
+        if (this.showFlashOverlayCheckbox) {
+            this.showFlashOverlayCheckbox.addEventListener('change', () => {
+                this.updateFlashOverlayControlsState();
+            });
+        }
+
         // Auto-preview on change
         const autoPreviewElements = [
             this.backgroundSelect, this.textInput, this.textPositionSelect, this.fontSizeSlider,
@@ -175,11 +188,23 @@ class BroadcastController {
         if (this.clockLatencyInput) {
             autoPreviewElements.push(this.clockLatencyInput);
         }
+        if (this.showFlashOverlayCheckbox) {
+            autoPreviewElements.push(this.showFlashOverlayCheckbox);
+        }
         if (this.flashOverlayOffsetSlider) {
             autoPreviewElements.push(this.flashOverlayOffsetSlider);
         }
         if (this.showConfigOverlayCheckbox) {
             autoPreviewElements.push(this.showConfigOverlayCheckbox);
+        }
+        for (const el of [
+            this.overlayShowFormatCheckbox,
+            this.overlayShowToneCheckbox,
+            this.overlayShow400HzCheckbox,
+            this.overlayShowCycleIdCheckbox,
+            this.overlayShowFlashCheckbox
+        ]) {
+            if (el) autoPreviewElements.push(el);
         }
         if (this.customBackgroundSelect) {
             autoPreviewElements.push(this.customBackgroundSelect);
@@ -300,16 +325,30 @@ class BroadcastController {
     updateOverlayControlsState() {
         const enabled = this.showConfigOverlayCheckbox && this.showConfigOverlayCheckbox.checked;
 
-        if (this.overlayFontSizeSlider) {
-            this.overlayFontSizeSlider.disabled = !enabled;
-        }
-
-        if (this.overlayPositionSelect) {
-            this.overlayPositionSelect.disabled = !enabled;
+        for (const el of [
+            this.overlayShowFormatCheckbox,
+            this.overlayShowToneCheckbox,
+            this.overlayShow400HzCheckbox,
+            this.overlayShowCycleIdCheckbox,
+            this.overlayShowFlashCheckbox,
+            this.overlayFontSizeSlider,
+            this.overlayPositionSelect
+        ]) {
+            if (el) el.disabled = !enabled;
         }
 
         if (this.overlayFontSizeValue) {
             this.overlayFontSizeValue.style.opacity = enabled ? '1' : '0.5';
+        }
+    }
+
+    updateFlashOverlayControlsState() {
+        const enabled = this.showFlashOverlayCheckbox && this.showFlashOverlayCheckbox.checked;
+        if (this.flashOverlayOffsetSlider) {
+            this.flashOverlayOffsetSlider.disabled = !enabled;
+        }
+        if (this.flashOverlayOffsetValue) {
+            this.flashOverlayOffsetValue.style.opacity = enabled ? '1' : '0.5';
         }
     }
 
@@ -375,8 +414,14 @@ class BroadcastController {
             clockLatencyMs: this.clockLatencyInput ? parseInt(this.clockLatencyInput.value, 10) : null,
             clockPosition: this.selectedClockPosition,
             showConfigOverlay: this.showConfigOverlayCheckbox ? this.showConfigOverlayCheckbox.checked : false,
+            overlayShowFormat: this.overlayShowFormatCheckbox ? this.overlayShowFormatCheckbox.checked : true,
+            overlayShowTone: this.overlayShowToneCheckbox ? this.overlayShowToneCheckbox.checked : true,
+            overlayShow400Hz: this.overlayShow400HzCheckbox ? this.overlayShow400HzCheckbox.checked : true,
+            overlayShowCycleId: this.overlayShowCycleIdCheckbox ? this.overlayShowCycleIdCheckbox.checked : true,
+            overlayShowFlash: this.overlayShowFlashCheckbox ? this.overlayShowFlashCheckbox.checked : true,
             configOverlayFontSize: this.overlayFontSizeSlider ? parseInt(this.overlayFontSizeSlider.value, 10) : null,
             configOverlayPosition: this.overlayPositionSelect ? this.overlayPositionSelect.value : 'top-left',
+            showFlashOverlay: this.showFlashOverlayCheckbox ? this.showFlashOverlayCheckbox.checked : true,
             flashOverlayOffset: this.flashOverlayOffsetSlider ? parseInt(this.flashOverlayOffsetSlider.value, 10) : 0
         };
     }
@@ -1014,6 +1059,21 @@ class BroadcastController {
         if (this.showConfigOverlayCheckbox && config.showConfigOverlay !== undefined) {
             this.showConfigOverlayCheckbox.checked = Boolean(config.showConfigOverlay);
         }
+        if (this.overlayShowFormatCheckbox && config.overlayShowFormat !== undefined) {
+            this.overlayShowFormatCheckbox.checked = Boolean(config.overlayShowFormat);
+        }
+        if (this.overlayShowToneCheckbox && config.overlayShowTone !== undefined) {
+            this.overlayShowToneCheckbox.checked = Boolean(config.overlayShowTone);
+        }
+        if (this.overlayShow400HzCheckbox && config.overlayShow400Hz !== undefined) {
+            this.overlayShow400HzCheckbox.checked = Boolean(config.overlayShow400Hz);
+        }
+        if (this.overlayShowCycleIdCheckbox && config.overlayShowCycleId !== undefined) {
+            this.overlayShowCycleIdCheckbox.checked = Boolean(config.overlayShowCycleId);
+        }
+        if (this.overlayShowFlashCheckbox && config.overlayShowFlash !== undefined) {
+            this.overlayShowFlashCheckbox.checked = Boolean(config.overlayShowFlash);
+        }
         if (this.overlayFontSizeSlider && config.configOverlayFontSize !== undefined) {
             const overlaySize = Number(config.configOverlayFontSize);
             if (Number.isFinite(overlaySize)) {
@@ -1023,6 +1083,9 @@ class BroadcastController {
         if (this.overlayPositionSelect && config.configOverlayPosition) {
             this.overlayPositionSelect.value = config.configOverlayPosition;
         }
+        if (this.showFlashOverlayCheckbox && config.showFlashOverlay !== undefined) {
+            this.showFlashOverlayCheckbox.checked = Boolean(config.showFlashOverlay);
+        }
         const incomingFlashOffset = config.flashOverlayOffset ?? config.popFlashOffset;
         if (this.flashOverlayOffsetSlider && incomingFlashOffset !== undefined) {
             const flashOffset = Number(incomingFlashOffset);
@@ -1031,6 +1094,7 @@ class BroadcastController {
             }
         }
         this.updateOverlayControlsState();
+        this.updateFlashOverlayControlsState();
         this.updateClockControlsState();
         this.updateRangeValues();
 

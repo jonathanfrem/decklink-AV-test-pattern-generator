@@ -86,8 +86,14 @@ class FFmpegBuilder {
             configOverlayFontSize = null,
             configOverlayPosition = 'top-left',
             flashOverlayOffset = 0,
+            showFlashOverlay = true,
             decklinkDevice = null,
-            clockLatencyMs = this.clockLatencyMs
+            clockLatencyMs = this.clockLatencyMs,
+            overlayShowFormat = true,
+            overlayShowTone = true,
+            overlayShow400Hz = true,
+            overlayShowCycleId = true,
+            overlayShowFlash = true
         } = config;
 
         // Calculate text position based on 9-grid system
@@ -350,7 +356,7 @@ class FFmpegBuilder {
             });
         }
         const flashOverlayFilters = [];
-        if (flashFlags.some(Boolean)) {
+        if (showFlashOverlay && flashFlags.some(Boolean)) {
             // Flash vidéo 1-frame, alternés sans chevauchement
             // Cycle 2 s @ fps : frame n%framesPer2s == 0 (1 kHz) puis n%framesPer2s == fps (400 Hz)
             const framesPer2s = Math.max(1, Math.round(fps * 2));
@@ -460,7 +466,12 @@ class FFmpegBuilder {
                 force400Flags,
                 decklinkAudioChannels,
                 overlayFontSize: configOverlayFontSize,
-                overlayPosition: configOverlayPosition
+                overlayPosition: configOverlayPosition,
+                overlayShowFormat,
+                overlayShowTone,
+                overlayShow400Hz,
+                overlayShowCycleId,
+                overlayShowFlash
             });
 
             if (Array.isArray(overlayFilters) && overlayFilters.length > 0) {
@@ -840,11 +851,16 @@ class FFmpegBuilder {
         force400Flags,
         decklinkAudioChannels,
         overlayFontSize,
-        overlayPosition
+        overlayPosition,
+        overlayShowFormat = true,
+        overlayShowTone = true,
+        overlayShow400Hz = true,
+        overlayShowCycleId = true,
+        overlayShowFlash = true
     }) {
         const lines = [];
 
-        if (videoFormat) {
+        if (overlayShowFormat && videoFormat) {
             lines.push(`Format: ${videoFormat}`);
         }
 
@@ -856,44 +872,52 @@ class FFmpegBuilder {
             limit: decklinkAudioChannels
         });
 
-        const audioSegments = [];
-        if (Number.isFinite(toneFrequency)) {
-            audioSegments.push(`${Math.round(toneFrequency)} Hz`);
-        }
-
-        const formattedDb = this.formatDbLabel(audioLevelDb);
-        if (formattedDb) {
-            audioSegments.push(formattedDb);
-        }
-
-        if (audioSegments.length > 0 || channelInfo.baseTone.length > 0) {
-            let descriptor = audioSegments.join(' ').trim();
-            if (channelInfo.baseTone.length > 0) {
-                const suffix = channelInfo.baseTone.join(', ');
-                descriptor = descriptor
-                    ? `${descriptor}: ${suffix}`
-                    : suffix;
+        if (overlayShowTone) {
+            const audioSegments = [];
+            if (Number.isFinite(toneFrequency)) {
+                audioSegments.push(`${Math.round(toneFrequency)} Hz`);
             }
 
-            if (descriptor) {
-                lines.push(`▌ ${descriptor}`);
+            const formattedDb = this.formatDbLabel(audioLevelDb);
+            if (formattedDb) {
+                audioSegments.push(formattedDb);
+            }
+
+            if (audioSegments.length > 0 || channelInfo.baseTone.length > 0) {
+                let descriptor = audioSegments.join(' ').trim();
+                if (channelInfo.baseTone.length > 0) {
+                    const suffix = channelInfo.baseTone.join(', ');
+                    descriptor = descriptor
+                        ? `${descriptor}: ${suffix}`
+                        : suffix;
+                }
+
+                if (descriptor) {
+                    lines.push(`▌ ${descriptor}`);
+                }
             }
         }
 
-        const forceLine = channelInfo.force400.length > 0
-            ? channelInfo.force400.join(', ')
-            : '--';
-        lines.push(`▌ 400Hz: ${forceLine}`);
+        if (overlayShow400Hz) {
+            const forceLine = channelInfo.force400.length > 0
+                ? channelInfo.force400.join(', ')
+                : '--';
+            lines.push(`▌ 400Hz: ${forceLine}`);
+        }
 
-        const cycleLine = channelInfo.cycle.length > 0
-            ? channelInfo.cycle.join(', ')
-            : '--';
-        lines.push(`▌ Cycle ID: ${cycleLine}`);
+        if (overlayShowCycleId) {
+            const cycleLine = channelInfo.cycle.length > 0
+                ? channelInfo.cycle.join(', ')
+                : '--';
+            lines.push(`▌ Cycle ID: ${cycleLine}`);
+        }
 
-        const flashLine = channelInfo.flash.length > 0
-            ? channelInfo.flash.join(', ')
-            : '--';
-        lines.push(`▌ 1-frame Flash: ${flashLine}`);
+        if (overlayShowFlash) {
+            const flashLine = channelInfo.flash.length > 0
+                ? channelInfo.flash.join(', ')
+                : '--';
+            lines.push(`▌ 1-frame Flash: ${flashLine}`);
+        }
 
         const cleanedLines = lines
             .map(line => typeof line === 'string' ? line.trim() : '')
